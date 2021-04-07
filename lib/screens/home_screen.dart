@@ -1,8 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:iclima/services/clima_manager.dart';
+import 'package:iclima/services/location.dart';
+import 'package:intl/intl.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   static final String id = 'homeScreenId';
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Location location = Location();
+  var data;
+  int temperature;
+  int feelsLike;
+  int humidity;
+  int windSpeed;
+  int windDegree;
+  String cityName;
+
+  //DATA
+  DateTime now;
+  String day;
+  int mounth;
+  String mounthName;
+
+  int dayWeek;
+  String dayName;
+
+  String time;
+  ClimaManager _climaManager = ClimaManager();
+
+  @override
+  void initState() {
+    _getCurrentWeather();
+    super.initState();
+  }
+
+  _getCurrentWeather() async {
+    data = await _climaManager.getData();
+    setState(() {
+      _getCurrentTime();
+      cityName = data['name'];
+      var temp = data['main']['temp'];
+      double feels = data['main']['feels_like'];
+      humidity = data['main']['humidity'];
+      double wind = data['wind']['speed'];
+      windDegree = data['wind']['deg'];
+      windSpeed = wind.toInt();
+      feelsLike = feels.toInt();
+      temperature = temp.toInt();
+    });
+  }
+
+  _getCurrentTime() {
+    now = DateTime.now();
+    print(now.hour);
+    dayWeek = now.weekday;
+    time = DateFormat.Hm().format(now);
+    DateFormat formatter = DateFormat('dd-MM-yyyy');
+    String formatted = formatter.format(now);
+    day = formatted.substring(0, 2);
+    var mount = formatted[4];
+    mounth = int.parse(mount);
+    switch (mounth) {
+      case 4:
+        mounthName = 'abril';
+        break;
+      case 5:
+        mounthName = 'maio';
+        break;
+    }
+    switch (dayWeek) {
+      case 1:
+        dayName = 'segunda-feira';
+        break;
+      case 2:
+        dayName = 'terça-feira';
+        break;
+      case 3:
+        dayName = 'quarta-feira';
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double _height = MediaQuery.of(context).size.height;
@@ -29,11 +112,13 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Cidade',
-                            style: TextStyle(fontSize: 64, color: Colors.white),
+                            data == null ? 'awating' : cityName,
+                            style: TextStyle(fontSize: 32, color: Colors.white),
                           ),
                           Text(
-                            '20º',
+                            temperature == null
+                                ? '0'
+                                : temperature.toString() + 'º',
                             style: TextStyle(
                                 fontSize: 86,
                                 color: Colors.white,
@@ -47,9 +132,9 @@ class HomeScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             FaIcon(FontAwesomeIcons.cloud,
-                                color: Colors.white, size: 84),
+                                color: Colors.white, size: 64),
                             SizedBox(
-                              height: 40,
+                              height: 20,
                             ),
                             Text(
                               'Nublado',
@@ -70,7 +155,7 @@ class HomeScreen extends StatelessWidget {
                   height: 2,
                 ),
                 Text(
-                  '10:40 - Segunda-feira - 06 de Abril',
+                  '${time == null ? '0' : time} - ${dayName == null ? 'segunda-feira' : dayName} - $day de ${mounthName == null ? '0' : mounthName} de 2021',
                   style: TextStyle(color: Colors.white, fontSize: 24),
                 ),
                 Divider(
@@ -78,12 +163,32 @@ class HomeScreen extends StatelessWidget {
                   thickness: 2,
                   height: 2,
                 ),
-                InfoRow('Sensação térmica', '22º'),
-                InfoRow('Umidade', '22%'),
-                InfoRow('Vento', '25km/h'),
-                InfoRow('Orientação do vento', '14graus'),
+                InfoRow('Sensação térmica',
+                    feelsLike == null ? '0 º' : feelsLike.toString() + 'º'),
+                InfoRow('Umidade',
+                    humidity == null ? '0%' : humidity.toString() + '%'),
+                InfoRow(
+                    'Vento',
+                    windSpeed == null
+                        ? '0km/h'
+                        : windSpeed.toString() + 'km/h'),
+                InfoRow(
+                    'Orientação do vento',
+                    windDegree == null
+                        ? '0 grau'
+                        : windDegree.toString() + 'graus'),
                 SizedBox(
                   height: _height / 40,
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.location_on_rounded),
+                      (Text('buscar localização')),
+                    ],
+                  ),
                 ),
                 Text(
                   'iClima - version: 0.0.1',
@@ -114,12 +219,12 @@ class InfoRow extends StatelessWidget {
         Text(title,
             style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.w300)),
         Text(info,
             style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 18,
                 fontWeight: FontWeight.w200)),
       ],
     );
