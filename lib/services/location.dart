@@ -1,17 +1,17 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:iclima/screens/home_screen.dart';
 
 class Location {
   double latitude;
   double longitude;
+
+  HomeScreen _homeScreen = HomeScreen();
 
   Future<Position> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Serviço de localização desativado');
-    }
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();

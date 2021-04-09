@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iclima/services/clima_manager.dart';
 import 'package:iclima/services/location.dart';
 import 'package:intl/intl.dart';
@@ -14,12 +13,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Location location = Location();
   var data;
+  String weather;
   int temperature;
   int feelsLike;
   int humidity;
   int windSpeed;
   int windDegree;
+  String icon;
   String cityName;
+  int seaLevel;
 
   //DATA
   DateTime now;
@@ -44,10 +46,14 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _getCurrentTime();
       cityName = data['name'];
+      weather = data['weather'][0]['main'];
+      _setTranslation();
       var temp = data['main']['temp'];
+      icon = data['weather'][0]['icon'];
       double feels = data['main']['feels_like'];
       humidity = data['main']['humidity'];
       double wind = data['wind']['speed'];
+      seaLevel = data['main']['sea_level'];
       windDegree = data['wind']['deg'];
       windSpeed = wind.toInt();
       feelsLike = feels.toInt();
@@ -55,9 +61,30 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  _setTranslation() {
+    if (weather != null) {
+      switch (weather) {
+        case 'Clouds':
+          weather = 'Nublado';
+          break;
+        case 'Thunderstorm':
+          weather = 'Tempestade de Trovões';
+          break;
+        case 'Drizzle':
+          weather = 'Nevasca';
+          break;
+        case 'Clear':
+          weather = 'Céu Limpo';
+          break;
+        case 'Snow':
+          weather = 'Neve';
+          break;
+      }
+    }
+  }
+
   _getCurrentTime() {
     now = DateTime.now();
-    print(now.hour);
     dayWeek = now.weekday;
     time = DateFormat.Hm().format(now);
     DateFormat formatter = DateFormat('dd-MM-yyyy');
@@ -66,11 +93,41 @@ class _HomeScreenState extends State<HomeScreen> {
     var mount = formatted[4];
     mounth = int.parse(mount);
     switch (mounth) {
+      case 1:
+        mounthName = 'janeiro';
+        break;
+      case 2:
+        mounthName = 'fevereiro';
+        break;
+      case 3:
+        mounthName = 'março';
+        break;
       case 4:
         mounthName = 'abril';
         break;
       case 5:
         mounthName = 'maio';
+        break;
+      case 6:
+        mounthName = 'junho';
+        break;
+      case 7:
+        mounthName = 'julho';
+        break;
+      case 8:
+        mounthName = 'agosto';
+        break;
+      case 9:
+        mounthName = 'setembro';
+        break;
+      case 10:
+        mounthName = 'outubro';
+        break;
+      case 11:
+        mounthName = 'novembro';
+        break;
+      case 12:
+        mounthName = 'dezembro';
         break;
     }
     switch (dayWeek) {
@@ -82,6 +139,18 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 3:
         dayName = 'quarta-feira';
+        break;
+      case 4:
+        dayName = 'quinta-feira';
+        break;
+      case 5:
+        dayName = 'sexta-feira';
+        break;
+      case 6:
+        dayName = 'sábado';
+        break;
+      case 3:
+        dayName = 'domingo';
         break;
     }
   }
@@ -131,17 +200,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            FaIcon(FontAwesomeIcons.cloud,
-                                color: Colors.white, size: 64),
+                            icon == null
+                                ? CircularProgressIndicator.adaptive()
+                                : SizedBox(
+                                    width: 70,
+                                    height: 70,
+                                    child: Image.network(icon == null
+                                        ? null
+                                        : 'http://openweathermap.org/img/wn/$icon@2x.png'),
+                                  ),
                             SizedBox(
                               height: 20,
                             ),
-                            Text(
-                              'Nublado',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w300),
+                            SizedBox(
+                              width: _width / 4,
+                              child: Text(
+                                weather == null ? 'nublado' : weather,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w300),
+                              ),
                             )
                           ],
                         ),
@@ -177,6 +256,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     windDegree == null
                         ? '0 grau'
                         : windDegree.toString() + 'graus'),
+                InfoRow('Nível do mar',
+                    seaLevel == null ? '1000' : seaLevel.toString()),
                 SizedBox(
                   height: _height / 40,
                 ),

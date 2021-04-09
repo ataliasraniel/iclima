@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:iclima/services/location.dart';
 
 class ClimaManager {
   Location location = Location();
+  String icon;
   String city;
   String temperature;
   String weather;
@@ -11,6 +13,7 @@ class ClimaManager {
 
   Future<dynamic> getData() async {
     var loc = await location.getCurrentLocation();
+
     double lat = loc.latitude;
     double long = loc.longitude;
     http.Response response = await http.get(Uri.parse(
@@ -18,6 +21,7 @@ class ClimaManager {
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
       city = data['name'];
+      icon = data['weather'][0]['icon'];
       return data;
     } else {
       print('response is: ${response.statusCode}');
