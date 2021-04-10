@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iclima/services/clima_manager.dart';
 import 'package:iclima/services/location.dart';
 import 'package:intl/intl.dart';
@@ -66,6 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
       switch (weather) {
         case 'Clouds':
           weather = 'Nublado';
+          break;
+        case 'Rain':
+          weather = 'Chuva';
           break;
         case 'Thunderstorm':
           weather = 'Tempestade de Trovões';
@@ -182,7 +186,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Text(
                             data == null ? 'awating' : cityName,
-                            style: TextStyle(fontSize: 32, color: Colors.white),
+                            style: TextStyle(
+                                fontSize: 32,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200),
                           ),
                           Text(
                             temperature == null
@@ -215,10 +222,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(
                               width: _width / 4,
                               child: Text(
-                                weather == null ? 'nublado' : weather,
+                                weather == null
+                                    ? 'awating'
+                                    : weather.toUpperCase(),
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 24,
+                                    fontSize: 23,
                                     fontWeight: FontWeight.w300),
                               ),
                             )
@@ -230,50 +240,73 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Divider(
                   color: Colors.white,
-                  thickness: 2,
-                  height: 2,
+                  height: 1,
                 ),
                 Text(
                   '${time == null ? '0' : time} - ${dayName == null ? 'segunda-feira' : dayName} - $day de ${mounthName == null ? '0' : mounthName} de 2021',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w300),
                 ),
                 Divider(
                   color: Colors.white,
-                  thickness: 2,
-                  height: 2,
+                  height: 1,
                 ),
-                InfoRow('Sensação térmica',
-                    feelsLike == null ? '0 º' : feelsLike.toString() + 'º'),
-                InfoRow('Umidade',
-                    humidity == null ? '0%' : humidity.toString() + '%'),
-                InfoRow(
-                    'Vento',
-                    windSpeed == null
-                        ? '0km/h'
-                        : windSpeed.toString() + 'km/h'),
-                InfoRow(
-                    'Orientação do vento',
-                    windDegree == null
-                        ? '0 grau'
-                        : windDegree.toString() + 'graus'),
-                InfoRow('Nível do mar',
-                    seaLevel == null ? '1000' : seaLevel.toString()),
+                weather == null
+                    ? CircularProgressIndicator.adaptive()
+                    : InfoRow(
+                        'Sensação térmica',
+                        feelsLike == null ? '0 º' : feelsLike.toString() + 'º',
+                        FontAwesomeIcons.temperatureHigh),
+                humidity == null
+                    ? CircularProgressIndicator.adaptive()
+                    : InfoRow(
+                        'Umidade',
+                        humidity == null ? '0%' : humidity.toString() + '%',
+                        FontAwesomeIcons.tint),
+                windSpeed == null
+                    ? CircularProgressIndicator.adaptive()
+                    : InfoRow(
+                        'Vento',
+                        windSpeed == null
+                            ? '0km/h'
+                            : windSpeed.toString() + 'km/h',
+                        FontAwesomeIcons.wind),
+                windDegree == null
+                    ? CircularProgressIndicator.adaptive()
+                    : InfoRow(
+                        'Orientação do vento',
+                        windDegree == null
+                            ? '0 graus'
+                            : windDegree.toString() + 'º',
+                        FontAwesomeIcons.compass),
+                seaLevel == null
+                    ? CircularProgressIndicator.adaptive()
+                    : InfoRow(
+                        'Nível do mar',
+                        seaLevel == null ? '1000' : seaLevel.toString(),
+                        FontAwesomeIcons.water,
+                      ),
                 SizedBox(
-                  height: _height / 40,
+                  height: _height / 60,
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _getCurrentWeather();
+                  },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.location_on_rounded),
-                      (Text('buscar localização')),
+                      (Text('localizar')),
                     ],
                   ),
                 ),
                 Text(
                   'iClima - version: 0.0.1',
                   style: TextStyle(
+                    fontSize: 12,
                     color: Colors.white.withAlpha(100),
                   ),
                 ),
@@ -290,22 +323,33 @@ class _HomeScreenState extends State<HomeScreen> {
 class InfoRow extends StatelessWidget {
   final String title;
   final String info;
-  InfoRow(this.title, this.info);
+  InfoRow(this.title, this.info, this.icon);
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title,
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w300)),
+        Row(
+          children: [
+            FaIcon(
+              icon,
+              size: 19,
+              color: Colors.white,
+            ),
+            SizedBox(width: 20),
+            Text(title,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w300)),
+          ],
+        ),
         Text(info,
             style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: FontWeight.w200)),
       ],
     );
