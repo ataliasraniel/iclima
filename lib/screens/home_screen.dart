@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iclima/services/clima_manager.dart';
 import 'package:iclima/services/location.dart';
 import 'package:intl/intl.dart';
+import 'dart:ui';
 
 class HomeScreen extends StatefulWidget {
   static final String id = 'homeScreenId';
@@ -12,6 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String languageCode;
+
   Location location = Location();
   var data;
   String weather;
@@ -38,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    print(window.locale.languageCode);
+    languageCode = window.locale.languageCode;
     _getCurrentWeather();
     super.initState();
   }
@@ -63,6 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _setTranslation() {
+    if (languageCode == 'en') {
+      return;
+    }
     if (weather != null) {
       switch (weather) {
         case 'Clouds':
@@ -91,70 +99,82 @@ class _HomeScreenState extends State<HomeScreen> {
     now = DateTime.now();
     dayWeek = now.weekday;
     time = DateFormat.Hm().format(now);
-    DateFormat formatter = DateFormat('dd-MM-yyyy');
+    DateFormat formatter;
+    languageCode == 'en'
+        ? formatter = DateFormat('yyyy-MM-dd')
+        : formatter = DateFormat('dd-MM-yyyy');
     String formatted = formatter.format(now);
     day = formatted.substring(0, 2);
-    var mount = formatted[4];
-    mounth = int.parse(mount);
+    var mounth;
+    languageCode == 'en' ? mounth = formatted[6] : mounth = formatted[4];
+    mounth = int.parse(mounth);
     switch (mounth) {
       case 1:
-        mounthName = 'janeiro';
+        languageCode == 'en' ? mounthName = 'january' : mounthName = 'janeiro';
         break;
       case 2:
-        mounthName = 'fevereiro';
+        languageCode == 'en'
+            ? mounthName = 'february'
+            : mounthName = 'fevereiro';
         break;
       case 3:
-        mounthName = 'março';
+        languageCode == 'en' ? mounthName = 'march' : mounthName = 'março';
         break;
       case 4:
-        mounthName = 'abril';
+        languageCode == 'en' ? mounthName = 'april' : mounthName = 'abril';
         break;
       case 5:
-        mounthName = 'maio';
+        languageCode == 'en' ? mounthName = 'may' : mounthName = 'maio';
         break;
       case 6:
-        mounthName = 'junho';
+        languageCode == 'en' ? mounthName = 'june' : mounthName = 'junho';
         break;
       case 7:
-        mounthName = 'julho';
+        languageCode == 'en' ? mounthName = 'july' : mounthName = 'julho';
         break;
       case 8:
-        mounthName = 'agosto';
+        languageCode == 'en' ? mounthName = 'august' : mounthName = 'agosto';
         break;
       case 9:
-        mounthName = 'setembro';
+        languageCode == 'en'
+            ? mounthName = 'september'
+            : mounthName = 'setembro';
         break;
       case 10:
-        mounthName = 'outubro';
+        languageCode == 'en' ? mounthName = 'october' : mounthName = 'outubro';
         break;
       case 11:
-        mounthName = 'novembro';
+        languageCode == 'en'
+            ? mounthName = 'november'
+            : mounthName = 'novembro';
         break;
       case 12:
-        mounthName = 'dezembro';
+        languageCode == 'en'
+            ? mounthName = 'december'
+            : mounthName = 'dezembro';
         break;
     }
     switch (dayWeek) {
       case 1:
-        dayName = 'segunda-feira';
+        languageCode == 'en' ? dayName = 'monday' : dayName = 'segunda-feira';
         break;
       case 2:
-        dayName = 'terça-feira';
+        languageCode == 'en' ? dayName = 'tuesday' : dayName = 'terça-feira';
         break;
       case 3:
-        dayName = 'quarta-feira';
+        languageCode == 'en' ? dayName = 'wednesday' : dayName = 'quarta-feira';
         break;
       case 4:
-        dayName = 'quinta-feira';
+        languageCode == 'en' ? dayName = 'thursday' : dayName = 'quinta-feira';
         break;
       case 5:
-        dayName = 'sexta-feira';
+        languageCode == 'en' ? dayName = 'friday' : dayName = 'sexta-feira';
         break;
       case 6:
-        dayName = 'sábado';
+        languageCode == 'en' ? dayName = 'saturday' : dayName = 'sábado';
         break;
       case 3:
-        dayName = 'domingo';
+        languageCode == 'en' ? dayName = 'sunday' : dayName = 'domingo';
         break;
     }
   }
@@ -243,7 +263,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 1,
                 ),
                 Text(
-                  '${time == null ? '0' : time} - ${dayName == null ? 'segunda-feira' : dayName} - $day de ${mounthName == null ? '0' : mounthName} de 2021',
+                  languageCode == 'en'
+                      ? '${time == null ? '0' : time} - 2021 - ${mounthName == null ? '' : mounthName} - $day, ${dayName == null ? '0' : dayName}'
+                      : '${time == null ? '0' : time} - ${dayName == null ? 'segunda-feira' : dayName} - $day de ${mounthName == null ? '0' : mounthName} de 2021',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -256,19 +278,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 weather == null
                     ? CircularProgressIndicator.adaptive()
                     : InfoRow(
-                        'Sensação térmica',
+                        languageCode == 'en'
+                            ? 'Feels like'
+                            : 'Sensação térmica',
                         feelsLike == null ? '0 º' : feelsLike.toString() + 'º',
                         FontAwesomeIcons.temperatureHigh),
                 humidity == null
                     ? CircularProgressIndicator.adaptive()
                     : InfoRow(
-                        'Umidade',
+                        languageCode == 'en' ? 'Humidity' : 'Umidade',
                         humidity == null ? '0%' : humidity.toString() + '%',
                         FontAwesomeIcons.tint),
                 windSpeed == null
                     ? CircularProgressIndicator.adaptive()
                     : InfoRow(
-                        'Vento',
+                        languageCode == 'en' ? 'Wind' : 'Vento',
                         windSpeed == null
                             ? '0km/h'
                             : windSpeed.toString() + 'km/h',
@@ -276,7 +300,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 windDegree == null
                     ? CircularProgressIndicator.adaptive()
                     : InfoRow(
-                        'Orientação do vento',
+                        languageCode == 'en'
+                            ? 'Wind orientation'
+                            : 'Orientação do vento',
                         windDegree == null
                             ? '0 graus'
                             : windDegree.toString() + 'º',
@@ -284,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 seaLevel == null
                     ? CircularProgressIndicator.adaptive()
                     : InfoRow(
-                        'Nível do mar',
+                        languageCode == 'en' ? 'Sealevel' : 'Nível do mar',
                         seaLevel == null ? '1000' : seaLevel.toString(),
                         FontAwesomeIcons.water,
                       ),
@@ -299,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.location_on_rounded),
-                      (Text('localizar')),
+                      (Text(languageCode == 'en' ? 'locate' : 'localizar')),
                     ],
                   ),
                 ),
